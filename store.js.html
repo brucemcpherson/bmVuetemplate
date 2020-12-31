@@ -1,0 +1,211 @@
+// this is where all global data for the app is stored, and where the vuex store is kept
+const Store = ((ns) => {
+  // this one is continuous polling to get current data status from sheet
+
+  const _poller = (sob) => {
+    const { state, commit, getters } = sob;
+    if (state.pollingPaused) return Promise.resolve(null);
+
+    return state.pollQueue
+      .add(({ entry }) => {
+        const options = {
+          current: Packer.slimCurrent({ current: state.currentPackage })
+        };
+        return Provoke.run("poll-update", options);
+      })
+      .then(({ result, entry }) => {
+        console.log('polled', new Date().getTime()/1000)
+        commit("setLatestPackage", {
+          result,
+          entry
+        });
+        return _poller(sob);
+      })
+      .catch((err) => {
+        const { entry, error } = err;
+        console.log("provoke error", error, entry, err);
+        commit("setThrowMessage", error);
+        commit("setThrow", true);
+      });
+  };
+
+  // the initial contents of the vxStore
+  const _initial = {
+    state: {
+      // whether polling is paused
+      pollingPaused: false,
+      // this is the latest package received from the server
+      latestPackage: null,
+      // this is the reconstructed current data
+      // initially it just needs to know the sheetnames required
+      currentPackage: {
+        sheetNames: ["users"]
+      },
+      showThrow: false,
+      throwMessage: null,
+      pollQueue: null,
+      simmer: null
+    },
+    getters: {
+      simTime(state) {
+        return state.simmer.time;
+      },
+      simRate(state) {
+        return state.simmer.rate;
+      },
+      dataSets(state) {
+        return state.currentPackage && state.currentPackage.everything;
+      },
+      users(state, getters) {
+        return Packer.getData(getters.dataSets, "users");
+      },
+      getUser: (state, getters) => (userId) => {
+        return getters.users.find((f) => f.id === userId);
+      },
+      transferring(state) {
+        return state.pollQueue.activeSize() > 0;
+      },
+      dataChanged(state) {
+        return state.currentPackage && state.currentPackage.changed;
+      }
+    },
+    actions: {
+      // can use this to start/restart the polling
+      pause({ dispatch, commit, state }, value) {
+        commit("setPollingPaused", value);
+        commit("setTimerPaused", value);
+        if (!value) {
+          state.simmer.start();
+          state.pollQueue.startQueue();
+          dispatch("getData");
+        } else {
+          state.simmer.stop();
+          state.pollQueue.stopQueue();
+        }
+      },
+      stopEverything({ state }) {
+        state.simmer.stop();
+        state.pollQueue.stopQueue();
+      },
+      startSimmer({ state }) {
+        state.simmer.start();
+      },
+      getData(sob) {
+        return _poller(sob);
+      }
+    },
+    mutations: {
+      setSimmer(state, value) {
+        state.simmer = value;
+      },
+      setSimRate(state, value) {
+        state.simmer.rate = value;
+      },
+      setPollQueue(state, value) {
+        state.pollQueue = value;
+      },
+      setPollingPaused(state, value) {
+        state.pollingPaused = value;
+      },
+      // populate an error message
+      setThrowMessage(state, value) {
+        state.throwMessage = value;
+      },
+      // signal that an error should be shown
+      setThrow(state, value) {
+        state.showThrow = value;
+      },
+      // take the latest polling data and populate it with anything that hasnt changed
+      setLatestPackage(state, value) {
+        // this is the latest response from the server
+        // if everything is null, then nothing has changed
+        const { result, entry } = value;
+        const { changed, cached } = result;
+
+        state.latestPackage = result;
+
+        state.currentPackage = Packer.reconstructEverything({
+          current: state.currentPackage,
+          latest: state.latestPackage
+        });
+        // only allow clearables on the first pass
+        state.clearables = null;
+      }
+    }
+  };
+
+  // handy for mapping in the components
+  const _vxMaps = Object.keys(_initial).reduce((p, c) => {
+    p[c] = Object.keys(_initial[c]);
+    return p;
+  }, {});
+
+  ns.mapGetters = Vuex.mapGetters(_vxMaps.getters);
+  ns.mapState = Vuex.mapState(_vxMaps.state);
+  ns.mapMutations = Vuex.mapMutations(_vxMaps.mutations);
+  ns.mapActions = Vuex.mapActions(_vxMaps.actions);
+
+  // local components will go here
+  ns.components = Components.init(Vue);
+
+  // and hoist this for convenience
+  ns.addComponent = Components.addComponent;
+
+  // call this when ready to go
+  ns.init = ({ modules } = {}) => {
+    // we're using Vuex extensively
+    Vue.use(Vuex);
+
+    // and this is the store
+    ns.vxStore = new Vuex.Store(_initial);
+
+    // set up things that needed some modules loaded asyncrnously,
+    // which would have been done by now
+    const { TimeSimmer, Qottle } = modules;
+    const ms = TimeSimmer.ms;
+
+    const simmer = new TimeSimmer({
+      immediate: false,
+      // update the simtime every 1 sec
+      tickRate: ms("seconds", 1),
+      // run in real time- set this to 1 - 60 means 1 minute passes in a second
+      rate: 60,
+      // we start now
+      startedAt: new Date().getTime()
+    });
+
+    const qottle = new Qottle({
+      // polling only 1 at a time, no more than 6 every minute
+      // and with at least 7 secs between each one
+      concurrent: 1,
+      rateLimited: true,
+      rateLimitPeriod: ms("minutes", 1),
+      rateLimitMax: 6,
+      rateLimitDelay: ms("seconds", 7)
+    });
+    ns.vxStore.commit("setSimmer", simmer);
+    ns.vxStore.commit("setPollQueue", qottle);
+    return ns;
+  };
+
+  // what to do when the app is ready to start
+  ns.load = () => {
+    ns.vxStore.dispatch("startSimmer");
+    ns.vxStore.dispatch("getData");
+  };
+
+  // what to do when the app unloads
+  ns.unload = () => {
+    ns.vxStore.dispatch("stopEverything");
+  };
+
+  // if necessary change behavior on visibility of tab
+  ns.handleVisibility = (tabVisibility) => {
+    // if the tab goes out of focus, we want to pause everything
+    tabVisibility
+      .onHidden(() => ns.vxStore.dispatch("pause", true))
+      .onVisible(() => ns.vxStore.dispatch("pause", false));
+  };
+
+  return ns;
+})({});
