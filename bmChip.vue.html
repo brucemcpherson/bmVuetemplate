@@ -1,0 +1,34 @@
+Store.addComponent ({    
+  name: 'bm-chip',
+  template: `
+    <v-tooltip top>
+      <template v-slot:activator="{ on, attrs }">
+          <v-chip
+            :color="item.avatarColor"
+            dark
+            v-bind="attrs"
+            v-on="on"
+            @click="$emit('clicked', item)"
+          >
+          <v-avatar left>
+            <img
+              :src="item.avatar"
+            >
+
+          </v-avatar>
+          <span class="caption">{{ item.name }}</span>
+        </v-chip>
+      </template>
+      <bm-chiptool :item="item"></bm-chiptool>
+      </v-tooltip>
+  `,
+ 
+   props: {
+     item: Object
+   }
+
+ })
+
+
+
+
