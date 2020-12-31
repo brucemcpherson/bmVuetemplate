@@ -1,0 +1,37 @@
+Store.addComponent ({    
+  name: 'bm-rateslider',
+  template: `
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-slider
+          v-model="rateSlider"
+          min="1"
+          :max="60 * 60"
+          thumb-label
+          dense
+          hide-details
+          v-bind="attrs"
+          v-on="on"
+        ></v-slider>
+      </template>
+      <span>
+        Adjust simulated time rate
+      </span>
+    </v-tooltip>
+  `,
+  computed: {
+    rateSlider: {
+      get () {
+        return this.simRate
+      },
+      set (value) {
+        this.setSimRate(value)
+      }
+    },
+    ...Store.mapGetters
+  },
+  methods: {
+    ...Store.mapMutations
+  }
+
+ })
