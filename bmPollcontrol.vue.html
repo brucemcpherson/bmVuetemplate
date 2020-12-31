@@ -1,0 +1,40 @@
+Store.addComponent ({    
+  name: 'bm-pollcontrol',
+  template: `
+    <span>
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn 
+            icon
+            v-bind="attrs"
+            v-on="on"
+            @click="pauser=!pauser"
+            
+          >
+            <v-icon>{{icon}}</v-icon>
+          </v-btn>
+        </template>
+        <span>Stop or start polling</span>
+      </v-tooltip>
+    </span>
+  `,
+  computed: {
+    icon () {
+      return this.pauser ? 'mdi-play' : 'mdi-stop'
+    },
+    pauser: {
+      get () {
+        return this.pollingPaused
+      },
+      set (value) {
+        this.pause(value)
+      }
+    },
+    ...Store.mapState
+  },
+  methods: {
+    ...Store.mapActions
+  }
+
+ })
+
