@@ -1,0 +1,60 @@
+Store.addComponent ({    
+  name: 'bm-summary',
+  template: `
+    <v-card flat>
+      <v-data-table v-if="someUsers && !selectedItem"
+        :headers="headers"
+        :items="items"
+        mobile-breakpoint= "200"
+        hide-default-footer
+      >
+        <template v-slot:item.department="{ item }">
+          <country-flag :country="item.country" size='small'/>
+          <span>{{item.department}}</span>
+        </template>
+        
+        <template v-slot:item.name="{ item }">
+          <bm-chip :item="item" @clicked="flipped" />
+        </template>
+
+      </v-data-table>
+      <span v-else-if="selectedItem">
+        detail
+      </span>
+      
+    </v-card>
+  `,
+ methods: {
+   flipped (item) {
+     this.selectedItem = this.selectedItem ? null : item
+   }
+ },
+ data() {
+  return {
+    selectedItem: null,
+    headers: [ {
+        text: "Department",
+        value: "department",
+        sortable: true,
+        align: "start"
+      }, {
+        text: "Name",
+        value: "name",
+        sortable: true,
+        align: "start"
+      }]
+    }
+  },
+  computed: {
+    someUsers () {
+      return this.users && this.users.length
+    },
+    items () {
+      return this.users
+    },
+    ...Store.mapGetters
+  }
+})
+
+
+
