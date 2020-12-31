@@ -1,0 +1,22 @@
+Store.addComponent ({    
+  name: 'bm-timechip',
+  template: `
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-chip
+          v-bind="attrs"
+          v-on="on"
+          color="accent"
+          dark
+        >
+         <bm-timestring :time="time"></bm-timestring>
+        </v-chip>
+      </template>
+      <span class="caption">Simulated time {{time}}</span>
+    </v-tooltip>
+  `,
+   props: {
+     time: Number
+   }
+ })
+
