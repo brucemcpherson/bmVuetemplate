@@ -1,0 +1,37 @@
+Store.addComponent ({    
+  name: 'bm-nametip',
+  template: `
+    <v-tooltip top>
+      
+      <template v-slot:activator="{ on, attrs }">
+        <span 
+          class="caption"             
+          v-bind="attrs"
+          v-on="on"
+        >
+          <slot name="name">
+            <span class="caption">
+              {{name}}
+            </span>
+          </slot>
+        </span>
+      </template>
+
+      <slot name="tip">
+        <span class="caption">
+          {{tip}}
+        </span>
+      </slot>
+    </v-tooltip>
+  `,
+ 
+   props: {
+     name: String,
+     tip: String
+   }
+
+ })
+
+
+
+
