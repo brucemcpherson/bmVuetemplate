@@ -1,0 +1,62 @@
+/**
+ * @namespace Provoke
+ * promise management for async calls
+ * this is expecting to find a global function called runWhitelist on the server side
+ * anything that is able to be run from the client should have been registered in the whitelisted actions store
+ * for example
+ 
+     const WhitelistedActions = (()=> {
+    
+     // make a new store so its globally available
+     const ks = keystore.newKeyStore()
+     
+     // whitelist everything that can be run
+     ks.setStore('get-answer', (...args)=>getAnswer(...args));
+     ks.setStore('show-something', (...args)=>ns.show(...args));
+    
+     return ks
+    })();
+    
+ */
+
+const Provoke =(ns=> {
+
+  /**
+  * run something asynchronously
+  * @param {string} name the name in whitelistedactions
+  * @param {[...]} the args
+  * @return {Promise} a promise
+  */
+  ns.run = function (name, ...runArgs) {
+    
+
+    // this will return a promise
+    return new Promise(function ( resolve , reject ) {
+      
+      google.script.run
+    
+      .withFailureHandler (function(err) {
+        reject (err);
+      })
+    
+      .withSuccessHandler (function(result) {
+        resolve (result);
+      })
+    
+      .runWhitelist (name,...runArgs); 
+    });
+    
+    
+  };
+  
+  
+  return ns;
+  
+})({});
+
+
+
+
+
+
+
