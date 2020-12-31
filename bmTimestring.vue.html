@@ -1,0 +1,32 @@
+Store.addComponent ({    
+  name: 'bm-timestring',
+  template: `
+    <span class="caption">
+      {{simDay}} {{simHour}}:{{simMinute}}
+    </span>
+  `,
+   methods: {
+     zpad ( len, text ) {
+      return text.toString().padStart(len, '0')
+     }
+   },
+   props: {
+     time: Number
+   },
+   computed: {
+     simDate () {
+       return this.time && new Date(this.time)
+     },
+     simDay () {
+       return this.simDate && this.simDate.toLocaleString('en-us', {  weekday: 'short' })
+     },
+     simHour () {
+       return this.simDate && this.zpad(2, this.simDate.toLocaleString('en-us', {  hour: '2-digit', hour12: false }))
+     },
+     simMinute () {
+       return this.simDate && this.zpad(2, this.simDate.toLocaleString('en-us', {  minute: '2-digit' }))
+     }
+   }
+ })
+
+
