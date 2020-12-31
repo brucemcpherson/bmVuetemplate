@@ -1,0 +1,46 @@
+// global Vue components can be registered here
+    
+const Components = (()=>{
+  const ns = {}
+  
+  /** 
+   * needs the VUE namespace on initialization
+  */
+  ns.init = (vue) => {
+    ns.vue = vue
+    ns.components = new KeyStore()
+    return ns
+  }
+  
+  ns.getComponent = (name) => {
+    return ns.components.getStore(name);
+  };
+
+  // register a component globally in Vue
+  ns.register = (component) => {
+    ns.vue.component(component.name, component);
+    return component;
+  };
+
+  // register all known components globally
+  ns.registerAll = () => ns.components.keys.map(key=>ns.register(ns.getComponent(key)))
+ 
+
+  // add a component to the list of known components
+  ns.addComponent = (component, name) => {
+    name = name || component.name;
+    if(!name) {
+      throw new Error(`no component name given`);
+    }
+    if (ns.components.hasStore(name)) {
+      throw new Error(`component ${name} already exists`);
+    }
+    // can be passed or embedded - so embed
+    if (!component.name) component.name = name
+    
+    ns.components.setStore(name, component);
+    return ns
+  };
+
+  return ns;
+})()
