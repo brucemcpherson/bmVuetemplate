@@ -1,0 +1,26 @@
+Store.addComponent ({    
+  name: 'bm-pollstats',
+  template: `
+    <v-card>
+      <v-container>
+        <v-row cols="12">
+          <v-col cols="4">
+            <bm-timechip :time="simTime" />
+          </v-col>
+          <v-col cols="4">
+            <bm-rateslider />
+          </v-col>
+          <v-col cols="4">
+            <bm-pollcontrol />
+            <bm-transfer />
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card>
+  `,
+   computed: {
+    ...Store.mapGetters
+   }
+
+ })
+
