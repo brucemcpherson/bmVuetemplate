@@ -1,0 +1,43 @@
+Store.addComponent ({    
+  name: 'bm-transfer',
+  template: `
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-icon  
+          v-bind="attrs"
+          v-on="on"
+          :color="status.color"
+          
+        >
+          {{status.icon}}
+        </v-icon>
+      </template>
+      <span>{{status.tip}}</span>
+    </v-tooltip>
+  `,
+  computed: {
+    pauser: {
+      get () {
+        return this.pollingPaused
+      },
+      set (value) {
+        this.pause(value)
+      }
+    },
+    status () {
+      if (this.pollingPaused) {
+        return { icon: 'mdi-sleep', color: "red", tip: "Transfer paused" };
+      } else if (this.transferring) {
+        return { icon: 'mdi-transfer', color: "green", tip: "Transfer active" };
+      } else if (this.dataChanged) {
+        return { icon: 'mdi-database-plus', color: "blue", tip: "Updated data on last transfer" };
+      } else {
+        return { icon: 'mdi-database', color: "gray", tip: "Nothing has changed" };
+      }
+    },
+    ...Store.mapGetters,
+    ...Store.mapState
+  }
+
+ })
+
