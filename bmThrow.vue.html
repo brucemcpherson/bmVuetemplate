@@ -1,0 +1,40 @@
+Store.addComponent ({    
+  name: 'bm-throw',
+  template: `
+    <v-snackbar
+      v-model="snackbar"
+      timeout= "-1"
+      color="accent"
+      multi-line
+    >
+
+      {{ throwMessage }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
+          color="error"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  `,
+    methods: {
+      ...Store.mapMutations
+    },
+    computed: {
+      snackbar: {
+        get () {
+          return this.showThrow
+        },
+        set (value) {
+          this.setThrow(value)
+        }
+      },
+      ...Store.mapState
+    }
+  }
+)
