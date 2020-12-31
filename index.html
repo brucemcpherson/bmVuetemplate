@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <base target="_top">
+    <?!= Include.html(['cdn.css']); ?>
+    <?!= Include.css(['app']); ?>
+  </head>
+  <body>
+    <?!= Include.html(['cdn', 'appmarkup']); ?>
+    <?!= Include.gs(['Packer', 'KeyStore']); ?>
+
+    <?!= Include.mjs({
+      sources: [{ 
+        key: 'CountryFlag',
+        src: 'https://cdn.skypack.dev/vue-country-flag',
+        exportName: 'default'
+      }, { 
+        key: 'Qottle',
+        src: 'https://cdn.skypack.dev/qottle',
+        exportName: 'default'
+      }, { 
+        key: 'TimeSimmer',
+        src: 'https://cdn.skypack.dev/timesimmer',
+        exportName: 'default'
+      }], 
+      promiseName: 'Store.moduleImports',
+      initialize: false
+    }) ?>
+
+    <?!= Include.js(['components','store','tabvisibility','provoke']); ?>
+    <?!= Include.vue([
+      'bmMain',
+      'bmChip', 
+      'bmThrow',
+      'bmChiptool',
+      'bmPollstats',
+      'bmRateslider',
+      'bmPollcontrol',
+      'bmTransfer',
+      'bmSummary',
+      'bmNametip',
+      'bmTimestring',
+      'bmTimechip',
+      'bmInfo'
+    ]); ?>
+    <?!= Include.js(['main']); ?>
+  </body>
+</html>
+
+
