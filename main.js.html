@@ -1,0 +1,53 @@
+/**
+* bm vue template with polling
+*/
+
+window.onload =  () => {
+
+  // need to wait for any modules to be imported
+  const waitForModules = Store.moduleImports || Promise.resolve(null)
+
+  waitForModules.then(modules=> {
+
+    // this is an npm module but we can install just like the others
+    Store.addComponent(modules.CountryFlag)
+    
+    // initialize everything and register all the components
+    Store.init({modules})
+      .components
+      .registerAll()
+    
+    // render vue
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      store: Store.vxStore
+    })
+    
+    // start polling
+    Store.load()
+
+    /**
+    * we need to detect when the add-on is closed to clean up
+    */
+    window.addEventListener("beforeunload", (event)=> {
+      Store.unload()
+      // Cancel the event as stated by the standard.
+      event.preventDefault();
+      // Older browsers supported custom message
+      event.returnValue = '';
+    });  
+
+    /**
+    * there's some action that could be taken when the tab becomes visible
+    */
+    Store.handleVisibility(new TabVisibility())
+  })
+
+}
+
+
+
+
+
+
