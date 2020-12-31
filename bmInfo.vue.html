@@ -1,0 +1,35 @@
+Store.addComponent ({    
+  name: 'bm-info',
+  template: `
+    <v-card>
+      <v-card-title>
+        About this Vue.js template
+      </v-card-title>
+      <v-card-text>
+        You can use this template to build Apps Script add-ons and web apps that use Vue.js, Vuex and Vuetify and spreadsheet polling
+      </v-card-text>
+
+      <v-card-actions>
+
+        <bm-chip :item="item" />
+        <v-spacer></v-spacer>
+        <v-btn color = "accent" target="_blank" href="https://ramblings.mcpher.com/vuejs-apps-script-add-ons/">
+          info
+        </v-btn>
+
+      </v-card-actions>
+      
+    </v-card>
+  `,
+  data: () => {
+    return {
+      item: {
+        avatar: 'https://lh3.google.com/u/0/ogw/ADGmqu972lwKrPZ_57o6Y0fwnTRNNxd-NQB0JYNOe-Q5=s64-c-mo',
+        avatarColor: 'indigo',
+        name: 'bruce'
+      }
+      
+    }
+  }
+ })
+
